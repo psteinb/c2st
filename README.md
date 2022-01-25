@@ -3,14 +3,16 @@
 ## two sample test using a ML classifier
 
 ``` python
-from c2st.check import c2st as compare
+> from c2st.check import c2st as compare
 
 #let's say you have 2 samples X and Y and want to know 
 #if they come from the same distribution
 
-probs = compare(X,Y)
-print(probs)
+> compare(X,Y)
+[0.51904464]
 ```
+
+The `compare` method returns (by default) the accuracy on how well a binary classifyer was able to classify Y from X while being trained on the concatenated dataset `(X,Y)`. All samples of `X` have received the label `0` and `Y` has received the label `1`.
 
 ## in `rsc`
 
