@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "c2st"
+version = "0.1.0"
+description = ""
+authors = ["Peter Steinbach <p.steinbach@hzdr.de>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+jupyter = "^1.0.0"
+ipykernel = "^6.7.0"
+scikit-learn = "^1.0.2"
+numpy = "^1.22.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
