@@ -3,30 +3,84 @@
 
 from __future__ import annotations
 
-import numpy as np
-# import torch
-from c2st.c2st import c2st
+from functools import partial
 
-# from torch import Tensor
-# from torch.distributions import MultivariateNormal as tmvn
-from scipy.random import multivariate_normal as tmvn
+import numpy as np
+from c2st.check import c2st as compare
+from numpy.random import default_rng
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.neural_network import MLPClassifier
+
+# import torch
+# from torch import Tensor
+# from torch.distributions import MultivariateNormal as tmvn
+
+FIXEDSEED = 1309
+NDIM = 10
+NSAMPLES = 4048
+RNG = default_rng(FIXEDSEED)
+
+
+def old_compare(
+    X: np.ndarray,
+    Y: np.ndarray,
+    seed: int = FIXEDSEED,
+    n_folds: int = 5,
+    scoring: str = "accuracy",
+    z_score: bool = True,
+    noise_scale: Optional[float] = None,
+    verbosity: int = 0,
+) -> np.ndarray:
+
+    ndim = X.shape[1]
+    clf_class = MLPClassifier
+    clf_kwargs = {
+        "activation": "relu",
+        "hidden_layer_sizes": (10 * ndim, 10 * ndim),
+        "max_iter": 1000,
+        "solver": "adam",
+    }
+
+    return compare(
+        X,
+        Y,
+        seed,
+        n_folds,
+        scoring,
+        z_score,
+        noise_scale,
+        verbosity,
+        clf_class,
+        clf_kwargs,
+    )
+
+
+# old_compare = partial(
+#     compare,
+#     clf_class=MLPClassifier,
+#     clf_kwargs={
+#         "activation": "relu",
+#         "hidden_layer_sizes": (10 * ndim, 10 * ndim),
+#         "max_iter": 1000,
+#         "solver": "adam",
+#         "seed": FIXEDSEED,
+#     },
+# )
 
 ## when reducing the number of samples
 ## when identical at ndim>10, for nsamples -> 500,1000,2000 when does c2st start to fail or produce false positives
 
 
 def old_c2st(
-    X: Tensor,
-    Y: Tensor,
-    seed: int = 1,
+    X: np.ndarray,
+    Y: np.ndarray,
+    seed: int = FIXEDSEED,
     n_folds: int = 5,
     scoring: str = "accuracy",
     z_score: bool = True,
     noise_scale: Optional[float] = None,
-) -> Tensor:
+) -> np.ndarray:
     """Return accuracy of classifier trained to distinguish samples from two distributions.
 
     Trains classifiers with N-fold cross-validation [1]. Scikit learn MLPClassifier are
@@ -73,17 +127,29 @@ def old_c2st(
     return np.atleast_1d(scores)
 
 
+def test_old_and_partial():
+
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+
+    X = xnormal(size=(1024,))
+    Y = xnormal(size=(1024,))
+
+    obs_c2st = old_compare(X, Y)
+    exp_c2st = old_c2st(X, Y)
+    print("old_compare", obs_c2st)
+    print("old_c2st", exp_c2st)
+
+    assert np.allclose(obs_c2st, exp_c2st)
+
+
 def test_same_distributions_alt():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
+    X = xnormal(size=(NSAMPLES,))
+    Y = xnormal(size=(NSAMPLES,))
 
-    X = xnormal.sample((nsamples,))
-    Y = xnormal.sample((nsamples,))
-
-    obs_c2st = c2st(X, Y)
+    obs_c2st = compare(X, Y)
 
     assert obs_c2st != None
     assert 0.49 < obs_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
@@ -92,16 +158,15 @@ def test_same_distributions_alt():
 
 def test_diff_distributions_alt():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    ynormal = partial(
+        RNG.multivariate_normal, mean=20.0 * np.ones(NDIM), cov=np.eye(NDIM)
+    )
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
-    ynormal = tmvn(mean=20.0 * np.ones(ndim), cov=np.eye(ndim))
+    X = xnormal(size=(NSAMPLES,))
+    Y = ynormal(size=(NSAMPLES,))
 
-    X = xnormal.sample((nsamples,))
-    Y = ynormal.sample((nsamples,))
-
-    obs_c2st = c2st(X, Y)
+    obs_c2st = compare(X, Y)
 
     assert obs_c2st != None
     assert (
@@ -112,16 +177,15 @@ def test_diff_distributions_alt():
 
 def test_distributions_overlap_by_two_sigma_alt():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    ynormal = partial(
+        RNG.multivariate_normal, mean=1.0 * np.ones(NDIM), cov=np.eye(NDIM)
+    )
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
-    ynormal = tmvn(mean=1.0 * np.ones(ndim), cov=np.eye(ndim))
+    X = xnormal(size=(NSAMPLES,))
+    Y = ynormal(size=(NSAMPLES,))
 
-    X = xnormal.sample((nsamples,))
-    Y = ynormal.sample((nsamples,))
-
-    obs_c2st = c2st(X, Y)
+    obs_c2st = compare(X, Y)
 
     assert obs_c2st != None
     print(obs_c2st)
@@ -132,13 +196,10 @@ def test_distributions_overlap_by_two_sigma_alt():
 
 def test_same_distributions_default():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
-
-    X = xnormal.sample((nsamples,))
-    Y = xnormal.sample((nsamples,))
+    X = xnormal(size=(NSAMPLES,))
+    Y = xnormal(size=(NSAMPLES,))
 
     obs_c2st = old_c2st(X, Y)
 
@@ -148,13 +209,10 @@ def test_same_distributions_default():
 
 def test_same_distributions_default_flexible_alt():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
-
-    X = xnormal.sample((nsamples,))
-    Y = xnormal.sample((nsamples,))
+    X = xnormal(size=(NSAMPLES,))
+    Y = xnormal(size=(NSAMPLES,))
 
     obs_c2st = old_c2st(X, Y, seed=42)
 
@@ -169,7 +227,7 @@ def test_same_distributions_default_flexible_alt():
         "solver": "adam",
     }
 
-    obs2_c2st = c2st(X, Y, seed=42, clf_class=clf_class, clf_kwargs=clf_kwargs)
+    obs2_c2st = compare(X, Y, seed=42, clf_class=clf_class, clf_kwargs=clf_kwargs)
 
     assert obs2_c2st != None
     assert 0.49 < obs2_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
@@ -178,14 +236,13 @@ def test_same_distributions_default_flexible_alt():
 
 def test_diff_distributions_default():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    ynormal = partial(
+        RNG.multivariate_normal, mean=20.0 * np.ones(NDIM), cov=np.eye(NDIM)
+    )
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
-    ynormal = tmvn(mean=20.0 * np.ones(ndim), cov=np.eye(ndim))
-
-    X = xnormal.sample((nsamples,))
-    Y = ynormal.sample((nsamples,))
+    X = xnormal(size=(NSAMPLES,))
+    Y = ynormal(size=(NSAMPLES,))
 
     obs_c2st = old_c2st(X, Y)
 
@@ -198,14 +255,13 @@ def test_diff_distributions_default():
 
 def test_distributions_overlap_by_two_sigma_default():
 
-    ndim = 5
-    nsamples = 4048
+    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    ynormal = partial(
+        RNG.multivariate_normal, mean=1.0 * np.ones(NDIM), cov=np.eye(NDIM)
+    )
 
-    xnormal = tmvn(mean=np.zeros(ndim), cov=np.eye(ndim))
-    ynormal = tmvn(mean=1.0 * np.ones(ndim), cov=np.eye(ndim))
-
-    X = xnormal.sample((nsamples,))
-    Y = ynormal.sample((nsamples,))
+    X = xnormal(size=(NSAMPLES,))
+    Y = ynormal(size=(NSAMPLES,))
 
     obs_c2st = old_c2st(X, Y)
 

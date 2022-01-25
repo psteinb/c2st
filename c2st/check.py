@@ -11,8 +11,8 @@ from sklearn.model_selection import KFold, cross_val_score
 
 # this is a numpy only impl
 def c2st(
-    X: Tensor,
-    Y: Tensor,
+    X: np.ndarray,
+    Y: np.ndarray,
     seed: int = 1,
     n_folds: int = 5,
     scoring: str = "accuracy",
@@ -21,7 +21,7 @@ def c2st(
     verbosity: int = 0,
     clf_class=RandomForestClassifier,
     clf_kwargs={},
-) -> Tensor:
+) -> np.ndarray:
     """
     Return accuracy of classifier trained to distinguish samples from supposedly
     two distributions <X> and <Y>. For details on the method, see [1,2].
