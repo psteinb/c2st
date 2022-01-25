@@ -55,8 +55,9 @@ def c2st(
 
     Example:
     ``` py
-    > c2st()
-
+    > c2st(X,Y)
+    [0.51904464]
+    #X and Y likely come from the same PDF or ensemble
     ```
     References:
         [1]: http://arxiv.org/abs/1610.06545
