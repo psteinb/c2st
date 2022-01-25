@@ -194,7 +194,7 @@ def test_distributions_overlap_by_two_sigma_alt():
     )  # distributions do not overlap, classifiers label with high accuracy
 
 
-def test_same_distributions_default():
+def test_old_same_distributions_default():
 
     xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
 
@@ -207,7 +207,7 @@ def test_same_distributions_default():
     assert 0.49 < obs_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
 
 
-def test_same_distributions_default_flexible_alt():
+def test_old_same_distributions_default_flexible_alt():
 
     xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
 
@@ -234,7 +234,7 @@ def test_same_distributions_default_flexible_alt():
     assert np.allclose(obs2_c2st, obs_c2st)
 
 
-def test_diff_distributions_default():
+def test_old_diff_distributions_default():
 
     xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
     ynormal = partial(
@@ -253,7 +253,7 @@ def test_diff_distributions_default():
     )  # distributions do not overlap, classifiers label with high accuracy
 
 
-def test_distributions_overlap_by_two_sigma_default():
+def test_old_distributions_overlap_by_two_sigma_default():
 
     xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
     ynormal = partial(
