@@ -56,22 +56,6 @@ def old_compare(
     )
 
 
-# old_compare = partial(
-#     compare,
-#     clf_class=MLPClassifier,
-#     clf_kwargs={
-#         "activation": "relu",
-#         "hidden_layer_sizes": (10 * ndim, 10 * ndim),
-#         "max_iter": 1000,
-#         "solver": "adam",
-#         "seed": FIXEDSEED,
-#     },
-# )
-
-## when reducing the number of samples
-## when identical at ndim>10, for nsamples -> 500,1000,2000 when does c2st start to fail or produce false positives
-
-
 def old_c2st(
     X: np.ndarray,
     Y: np.ndarray,
