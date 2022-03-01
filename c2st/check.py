@@ -2,6 +2,7 @@
 # under the Affero General Public License v3, see <https://www.gnu.org/licenses/>.
 
 from typing import Optional
+from functools import wraps
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -95,18 +96,8 @@ def c2st_(
     return scores
 
 
-def c2st(
-    X: np.ndarray,
-    Y: np.ndarray,
-    seed: int = 1,
-    n_folds: int = 5,
-    scoring: str = "accuracy",
-    z_score: bool = True,
-    noise_scale: Optional[float] = None,
-    verbosity: int = 0,
-    clf_class=RandomForestClassifier,
-    clf_kwargs={},
-) -> np.ndarray:
+@wraps(c2st_)
+def c2st(*args, **kwds) -> np.ndarray:
     """
     Return accuracy of classifier trained to distinguish samples from supposedly
     two distributions <X> and <Y>. For details on the method, see [1,2].
@@ -153,18 +144,5 @@ def c2st(
         [3]: https://scikit-learn.org/stable/modules/cross_validation.html
     """
 
-    scores = c2st_(
-        X,
-        Y,
-        seed,
-        n_folds,
-        scoring,
-        z_score,
-        noise_scale,
-        verbosity,
-        clf_class,
-        clf_kwargs,
-    )
-
-    scores = np.asarray(np.mean(scores)).astype(np.float32)
+    scores = np.asarray(np.mean(c2st_(*args, **kwds)), dtype=np.float32)
     return np.atleast_1d(scores)
