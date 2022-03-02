@@ -117,7 +117,7 @@ def c2st(
         clf, data, target, cv=cv, scoring=scoring, verbose=verbosity
     )
 
-    mean_scores = np.atleast_1d(np.mean(scores).astype(np.float32))
+    mean_scores = np.atleast_1d(scores.mean())
     if return_scores:
         return mean_scores, scores
     else:
