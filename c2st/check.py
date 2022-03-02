@@ -1,4 +1,5 @@
 from typing import Optional
+import warnings
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -8,10 +9,14 @@ from sklearn.model_selection import KFold, cross_val_score
 def c2st(
     X: np.ndarray,
     Y: np.ndarray,
+    seed=None,
+    n_folds=None,
     scoring: str = "balanced_accuracy",
     z_score: bool = True,
     noise_scale: Optional[float] = None,
     verbosity: int = 0,
+    clf_class=None,
+    clf_kwargs=None,
     clf=RandomForestClassifier(random_state=1),
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
@@ -41,8 +46,6 @@ def c2st(
     Args:
         X: Samples from one distribution, shape (n_samples_X, n_features)
         Y: Samples from another distribution, shape (n_samples_Y, n_features)
-        seed: Seed for sklearn
-        n_folds: Number of folds
         z_score: Z-scoring using X
         noise_scale: If passed, will add Gaussian noise with std noise_scale to
             samples of X and of Y
@@ -69,6 +72,28 @@ def c2st(
         [2]: https://www.osti.gov/biblio/826696/
         [3]: https://scikit-learn.org/stable/modules/cross_validation.html
     """
+
+    # Support previous API
+    kwds = dict(
+        seed=seed, clf_class=clf_class, clf_kwargs=clf_kwargs, n_folds=n_folds
+    )
+
+    def _get(key, default):
+        val = kwds.get(key)
+        if val is not None:
+            warnings.warn(f"{key} deprecated", DeprecationWarning)
+            return val
+        else:
+            return default
+
+    # If any of the kwds are used, switch to previous API.
+    if list(kwds.values()) != [None] * len(kwds):
+        clf_class = _get("clf_class", RandomForestClassifier)
+        clf_kwargs = _get("clf_kwargs", dict())
+        seed = _get("seed", 1)
+        n_folds = _get("n_folds", 5)
+        clf = clf_class(random_state=seed, **clf_kwargs)
+        cv = KFold(n_splits=n_folds, shuffle=True, random_state=seed)
 
     if z_score:
         X_mean = np.mean(X, axis=0)
@@ -97,3 +122,11 @@ def c2st(
         return mean_scores, scores
     else:
         return mean_scores
+
+
+# Support previous API
+def c2st_(*args, **kwds):
+    """Same as c2st(..., return_scores=True)[1], so return only a 1d array of
+    CV scores. Args and kwds are the same as c2st().
+    """
+    return c2st(*args, **kwds, return_scores=True)[1]
