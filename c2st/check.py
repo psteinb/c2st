@@ -74,8 +74,8 @@ def c2st_(
         Y = (Y - X_mean) / X_std
 
     if noise_scale is not None:
-        X += noise_scale * np.randn(X.shape)
-        Y += noise_scale * np.randn(Y.shape)
+        X += noise_scale * np.random.randn(*X.shape)
+        Y += noise_scale * np.random.randn(*Y.shape)
 
     # X = X.cpu().numpy()
     # Y = Y.cpu().numpy()
