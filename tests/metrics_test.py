@@ -6,11 +6,15 @@ from __future__ import annotations
 from functools import partial
 
 import numpy as np
-from c2st.check import c2st as compare
+from c2st.check import c2st as _compare
 from numpy.random import default_rng
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.neural_network import MLPClassifier
+
+# All tests below assume default scoring="accuracy" instead of the new
+# "balanced_accuracy", so bend that back here.
+compare = partial(_compare, scoring="accuracy")
 
 # import torch
 # from torch import Tensor
@@ -42,7 +46,7 @@ def old_compare(
         "solver": "adam",
     }
 
-    return compare(
+    return _compare(
         X,
         Y,
         seed,
