@@ -26,17 +26,17 @@ probably samples from different distributions.
 >>> X=rng.normal(loc=0, scale=1, size=(1000,20))
 >>> Y=rng.normal(loc=0, scale=1, size=(1000,20))
 >>> c2st(X, Y)
-[0.51904464]
+0.51904464
 
 # now shift the mean of Y a bit
 Y=rng.normal(loc=1.5, scale=1, size=(1000,20))
 >>> c2st(X, Y)
-[0.99950249]
+0.99950249
 
 # or change the distribution's width
 Y=rng.normal(loc=0, scale=2, size=(1000,20))
 >>> c2st(X, Y)
-[0.95129686]
+0.95129686
 ```
 
 ## In `rsc`

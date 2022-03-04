@@ -141,7 +141,7 @@ def test_same_distributions_alt():
     obs_c2st = compare(X, Y)
 
     assert obs_c2st != None
-    assert 0.47 < obs_c2st < 0.53  # only by chance we differentiate the 2 samples
+    assert 0.49 < obs_c2st < 0.51  # only by chance we differentiate the 2 samples
     print(obs_c2st)
 
 
@@ -193,7 +193,7 @@ def test_old_same_distributions_default():
     obs_c2st = old_c2st(X, Y)
 
     assert obs_c2st != None
-    assert 0.47 < obs_c2st[0] < 0.53  # only by chance we differentiate the 2 samples
+    assert 0.49 < obs_c2st < 0.51  # only by chance we differentiate the 2 samples
 
 
 def test_old_same_distributions_default_flexible_alt():
@@ -206,7 +206,7 @@ def test_old_same_distributions_default_flexible_alt():
     obs_c2st = old_c2st(X, Y, seed=42)
 
     assert obs_c2st != None
-    assert 0.47 < obs_c2st[0] < 0.53  # only by chance we differentiate the 2 samples
+    assert 0.49 < obs_c2st < 0.51  # only by chance we differentiate the 2 samples
 
     clf_class = MLPClassifier
     clf_kwargs = {
@@ -221,8 +221,8 @@ def test_old_same_distributions_default_flexible_alt():
     obs2_c2st = compare(X, Y, seed=42, clf_class=clf_class, clf_kwargs=clf_kwargs)
 
     assert obs2_c2st != None
-    assert 0.47 < obs2_c2st < 0.53  # only by chance we differentiate the 2 samples
-    assert np.allclose(obs2_c2st, obs_c2st[0], atol=0.03)
+    assert 0.49 < obs2_c2st < 0.51  # only by chance we differentiate the 2 samples
+    assert np.allclose(obs2_c2st, obs_c2st)
 
 
 def test_old_diff_distributions_default():
@@ -240,7 +240,7 @@ def test_old_diff_distributions_default():
     assert obs_c2st != None
     print(obs_c2st)
     assert (
-        0.98 < obs_c2st[0]
+        0.98 < obs_c2st
     )  # distributions do not overlap, classifiers label with high accuracy
 
 
@@ -259,5 +259,5 @@ def test_old_distributions_overlap_by_two_sigma_default():
     assert obs_c2st != None
     print(obs_c2st)
     assert (
-        0.8 < obs_c2st[0]
+        0.8 < obs_c2st
     )  # distributions do not overlap, classifiers label with high accuracy

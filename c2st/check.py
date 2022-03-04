@@ -61,12 +61,6 @@ def c2st(
             cross-validation.
         scores: 1d array of CV scores. Only if return_scores is True.
 
-    Example:
-    ``` py
-    > c2st(X,Y)
-    [0.51904464]
-    #X and Y likely come from the same PDF or ensemble
-    ```
     References:
         [1]: http://arxiv.org/abs/1610.06545
         [2]: https://www.osti.gov/biblio/826696/
@@ -105,9 +99,6 @@ def c2st(
         X += noise_scale * np.random.randn(*X.shape)
         Y += noise_scale * np.random.randn(*Y.shape)
 
-    # X = X.cpu().numpy()
-    # Y = Y.cpu().numpy()
-
     # prepare data
     data = np.concatenate((X, Y))
     # labels
@@ -117,7 +108,7 @@ def c2st(
         clf, data, target, cv=cv, scoring=scoring, verbose=verbosity
     )
 
-    mean_scores = np.atleast_1d(scores.mean())
+    mean_scores = scores.mean()
     if return_scores:
         return mean_scores, scores
     else:

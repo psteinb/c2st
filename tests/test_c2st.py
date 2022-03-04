@@ -18,10 +18,6 @@ def test_api():
     X = randn(1000, 3)
     Y = randn(100, 3)
 
-    ms = c2st(X, Y)
-    assert ms.ndim == 1
-    assert len(ms) == 1
-
     ms = c2st(X, Y, clf=KNeighborsClassifier(5))
     ms = c2st(X, Y, cv=StratifiedKFold())
 
