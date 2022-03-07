@@ -19,6 +19,7 @@ def test_api():
 
     ms = c2st(X, Y, clf=KNeighborsClassifier(5))
     ms = c2st(X, Y, cv=StratifiedKFold())
+    ms = c2st(X, Y, noise_scale=0.1)
 
     ms, s = c2st(X, Y, return_scores=True, cv=KFold(7))
     assert len(s) == 7
