@@ -22,7 +22,7 @@ compare = partial(_compare, scoring="accuracy")
 
 FIXEDSEED = 1309
 NDIM = 10
-NSAMPLES = 4048
+NSAMPLES = 1024
 RNG = default_rng(FIXEDSEED)
 
 
@@ -44,6 +44,8 @@ def old_compare(
         "hidden_layer_sizes": (10 * ndim, 10 * ndim),
         "max_iter": 1000,
         "solver": "adam",
+        "early_stopping": True,
+        "n_iter_no_change": 50,
     }
 
     return _compare(
@@ -103,6 +105,8 @@ def old_c2st(
         max_iter=1000,
         solver="adam",
         random_state=seed,
+        early_stopping=True,
+        n_iter_no_change=50,
     )
 
     data = np.concatenate((X, Y))
@@ -140,7 +144,7 @@ def test_same_distributions_alt():
     obs_c2st = compare(X, Y)
 
     assert obs_c2st != None
-    assert 0.49 < obs_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
+    assert 0.47 < obs_c2st < 0.53  # only by chance we differentiate the 2 samples
     print(obs_c2st)
 
 
@@ -158,7 +162,7 @@ def test_diff_distributions_alt():
 
     assert obs_c2st != None
     assert (
-        0.98 < obs_c2st[0]
+        0.98 < obs_c2st
     )  # distributions do not overlap, classifiers label with high accuracy
     print(obs_c2st)
 
@@ -178,7 +182,7 @@ def test_distributions_overlap_by_two_sigma_alt():
     assert obs_c2st != None
     print(obs_c2st)
     assert (
-        0.8 < obs_c2st[0]
+        0.8 < obs_c2st
     )  # distributions do not overlap, classifiers label with high accuracy
 
 
@@ -192,7 +196,7 @@ def test_old_same_distributions_default():
     obs_c2st = old_c2st(X, Y)
 
     assert obs_c2st != None
-    assert 0.49 < obs_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
+    assert 0.47 < obs_c2st[0] < 0.53  # only by chance we differentiate the 2 samples
 
 
 def test_old_same_distributions_default_flexible_alt():
@@ -205,7 +209,7 @@ def test_old_same_distributions_default_flexible_alt():
     obs_c2st = old_c2st(X, Y, seed=42)
 
     assert obs_c2st != None
-    assert 0.49 < obs_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
+    assert 0.47 < obs_c2st[0] < 0.53  # only by chance we differentiate the 2 samples
 
     clf_class = MLPClassifier
     clf_kwargs = {
@@ -218,7 +222,7 @@ def test_old_same_distributions_default_flexible_alt():
     obs2_c2st = compare(X, Y, seed=42, clf_class=clf_class, clf_kwargs=clf_kwargs)
 
     assert obs2_c2st != None
-    assert 0.49 < obs2_c2st[0] < 0.51  # only by chance we differentiate the 2 samples
+    assert 0.47 < obs2_c2st < 0.53  # only by chance we differentiate the 2 samples
     assert np.allclose(obs2_c2st, obs_c2st)
 
 

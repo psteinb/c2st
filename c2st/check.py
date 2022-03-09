@@ -139,7 +139,7 @@ def c2st(
         clf_kwargs: key-value arguments dictuinary to the class specified by clf_class, e.g. sklearn.ensemble.RandomForestClassifier
 
     Return:
-        np.ndarray offering the accuracy scores over the test sets from cross-validation
+        np.mean of outputs from sklearn.cross_val_score (used internally)
 
     Example:
     ``` py
@@ -167,4 +167,5 @@ def c2st(
     )
 
     scores = np.asarray(np.mean(scores)).astype(np.float32)
-    return np.atleast_1d(scores)
+    value = np.atleast_1d(scores)[0]
+    return value
