@@ -163,6 +163,6 @@ def c2st(
         clf_kwargs,
     )
 
-    scores = np.asarray(np.mean(scores)).astype(np.float32)
+    scores = np.mean(scores)
     value = np.atleast_1d(scores)[0]
     return value

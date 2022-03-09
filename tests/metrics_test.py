@@ -214,13 +214,15 @@ def test_old_same_distributions_default_flexible_alt():
         "hidden_layer_sizes": (10 * X.shape[1], 10 * X.shape[1]),
         "max_iter": 1000,
         "solver": "adam",
+        "early_stopping": True,
+        "n_iter_no_change": 50,
     }
 
     obs2_c2st = compare(X, Y, seed=42, clf_class=clf_class, clf_kwargs=clf_kwargs)
 
     assert obs2_c2st != None
     assert 0.47 < obs2_c2st < 0.53  # only by chance we differentiate the 2 samples
-    assert np.allclose(obs2_c2st, obs_c2st)
+    assert np.allclose(obs2_c2st, obs_c2st[0], atol=0.03)
 
 
 def test_old_diff_distributions_default():
