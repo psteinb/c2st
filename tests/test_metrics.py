@@ -1,21 +1,19 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import Optional
 
 import numpy as np
-from c2st.check import c2st as _compare
 from numpy.random import default_rng
-from sklearn.ensemble import RandomForestClassifier
+
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.neural_network import MLPClassifier
+
+from c2st.check import c2st as _compare
 
 # All tests below assume default scoring="accuracy" instead of the new
 # "balanced_accuracy", so bend that back here.
 compare = partial(_compare, scoring="accuracy")
-
-# import torch
-# from torch import Tensor
-# from torch.distributions import MultivariateNormal as tmvn
 
 FIXEDSEED = 1309
 NDIM = 10
@@ -83,13 +81,15 @@ def old_c2st(
     shuffle = KFold(n_splits=n_folds, shuffle=True, random_state=seed)
     scores = cross_val_score(clf, data, target, cv=shuffle, scoring=scoring)
 
-    scores = np.asarray(np.mean(scores)).astype(np.float32)
+    scores = np.mean(scores)
     return np.atleast_1d(scores)
 
 
 def test_old_and_partial():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
 
     X = xnormal(size=(1024,))
     Y = xnormal(size=(1024,))
@@ -104,21 +104,27 @@ def test_old_and_partial():
 
 def test_same_distributions_alt():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
 
     X = xnormal(size=(NSAMPLES,))
     Y = xnormal(size=(NSAMPLES,))
 
     obs_c2st = compare(X, Y)
 
-    assert obs_c2st != None
-    assert 0.49 < obs_c2st < 0.51  # only by chance we differentiate the 2 samples
+    assert obs_c2st is not None
+    assert (
+        0.49 < obs_c2st < 0.51
+    )  # only by chance we differentiate the 2 samples
     print(obs_c2st)
 
 
 def test_diff_distributions_alt():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
     ynormal = partial(
         RNG.multivariate_normal, mean=20.0 * np.ones(NDIM), cov=np.eye(NDIM)
     )
@@ -128,7 +134,7 @@ def test_diff_distributions_alt():
 
     obs_c2st = compare(X, Y)
 
-    assert obs_c2st != None
+    assert obs_c2st is not None
     assert (
         0.98 < obs_c2st
     )  # distributions do not overlap, classifiers label with high accuracy
@@ -137,7 +143,9 @@ def test_diff_distributions_alt():
 
 def test_distributions_overlap_by_two_sigma_alt():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
     ynormal = partial(
         RNG.multivariate_normal, mean=1.0 * np.ones(NDIM), cov=np.eye(NDIM)
     )
@@ -147,7 +155,7 @@ def test_distributions_overlap_by_two_sigma_alt():
 
     obs_c2st = compare(X, Y)
 
-    assert obs_c2st != None
+    assert obs_c2st is not None
     print(obs_c2st)
     assert (
         0.8 < obs_c2st
@@ -156,20 +164,26 @@ def test_distributions_overlap_by_two_sigma_alt():
 
 def test_old_same_distributions_default():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
 
     X = xnormal(size=(NSAMPLES,))
     Y = xnormal(size=(NSAMPLES,))
 
     obs_c2st = old_c2st(X, Y)
 
-    assert obs_c2st != None
-    assert 0.49 < obs_c2st < 0.51  # only by chance we differentiate the 2 samples
+    assert obs_c2st is not None
+    assert (
+        0.49 < obs_c2st < 0.51
+    )  # only by chance we differentiate the 2 samples
 
 
 def test_old_same_distributions_default_flexible_alt():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
 
     X = xnormal(size=(NSAMPLES,))
     Y = xnormal(size=(NSAMPLES,))
@@ -177,25 +191,32 @@ def test_old_same_distributions_default_flexible_alt():
     seed = 42
     obs_c2st = old_c2st(X, Y, seed=seed)
 
-    assert obs_c2st != None
+    assert obs_c2st is not None
     assert (
         0.49 < obs_c2st < 0.51
     )  # only by chance we differentiate the 2 samples
 
     cv = KFold(n_splits=5, shuffle=True, random_state=seed)
-    clf=_get_mlp_clf(ndim=X.shape[1], random_state=seed)
+    clf = _get_mlp_clf(ndim=X.shape[1], random_state=seed)
     obs2_c2st = compare(
-        X, Y, clf=clf, cv=cv,
+        X,
+        Y,
+        clf=clf,
+        cv=cv,
     )
 
-    assert obs2_c2st != None
-    assert 0.49 < obs2_c2st < 0.51  # only by chance we differentiate the 2 samples
+    assert obs2_c2st is not None
+    assert (
+        0.49 < obs2_c2st < 0.51
+    )  # only by chance we differentiate the 2 samples
     assert np.allclose(obs2_c2st, obs_c2st)
 
 
 def test_old_diff_distributions_default():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
     ynormal = partial(
         RNG.multivariate_normal, mean=20.0 * np.ones(NDIM), cov=np.eye(NDIM)
     )
@@ -205,7 +226,7 @@ def test_old_diff_distributions_default():
 
     obs_c2st = old_c2st(X, Y)
 
-    assert obs_c2st != None
+    assert obs_c2st is not None
     print(obs_c2st)
     assert (
         0.98 < obs_c2st
@@ -214,7 +235,9 @@ def test_old_diff_distributions_default():
 
 def test_old_distributions_overlap_by_two_sigma_default():
 
-    xnormal = partial(RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM))
+    xnormal = partial(
+        RNG.multivariate_normal, mean=np.zeros(NDIM), cov=np.eye(NDIM)
+    )
     ynormal = partial(
         RNG.multivariate_normal, mean=1.0 * np.ones(NDIM), cov=np.eye(NDIM)
     )
@@ -224,7 +247,7 @@ def test_old_distributions_overlap_by_two_sigma_default():
 
     obs_c2st = old_c2st(X, Y)
 
-    assert obs_c2st != None
+    assert obs_c2st is not None
     print(obs_c2st)
     assert (
         0.8 < obs_c2st
