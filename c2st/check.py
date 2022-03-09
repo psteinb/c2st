@@ -15,7 +15,7 @@ def c2st_(
     Y: np.ndarray,
     seed: int = 1,
     n_folds: int = 5,
-    scoring: str = "accuracy",
+    scoring: str = "balanced_accuracy",
     z_score: bool = True,
     noise_scale: Optional[float] = None,
     verbosity: int = 0,
