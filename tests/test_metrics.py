@@ -24,11 +24,13 @@ RNG = default_rng(FIXEDSEED)
 def _get_mlp_clf(ndim, random_state=None):
     return MLPClassifier(
         activation="relu",
-        hidden_layer_sizes=(10 * ndim, 10 * ndim),
-        ##hidden_layer_sizes=(ndim//2,),
+        ##hidden_layer_sizes=(10 * ndim, 10 * ndim),
+        hidden_layer_sizes=(ndim // 2,),
         max_iter=1000,
         solver="adam",
         random_state=random_state,
+        early_stopping=True,
+        learning_rate="adaptive",
     )
 
 
