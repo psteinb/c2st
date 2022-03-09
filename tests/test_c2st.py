@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import StratifiedKFold, KFold
 
-from c2st.check import c2st, c2st_
+from c2st.check import c2st
 
 
 rng = np.random.default_rng(seed=123)
@@ -22,12 +22,4 @@ def test_api():
     ms = c2st(X, Y, noise_scale=0.1)
 
     ms, s = c2st(X, Y, return_scores=True, cv=KFold(7))
-    assert len(s) == 7
-
-
-def test_api_underscore():
-    X = randn(10, 3)
-    Y = randn(5, 3)
-
-    s = c2st_(X, Y, cv=KFold(7))
     assert len(s) == 7
