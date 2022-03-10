@@ -5,10 +5,10 @@
 Test whether sets of D-dimensional points are samples from the same
 multivariate probability distribution.
 
-The `c2st` function returns (by default) the accuracy of how well a binary
-classifier was able to classify two sets of points `X` and `Y` while being
-trained on the concatenated dataset `(X,Y)`. All samples of `X` have received
-the label `0` and `Y` has received the label `1`.
+The `c2st` function returns the accuracy of how well a binary classifier was
+able to classify two sets of points `X` and `Y` while being trained on the
+concatenated dataset `(X,Y)`. All samples of `X` have received the label `0`
+and `Y` has received the label `1`.
 
 A value close to 0.5 means that the classifier is not better than random
 guessing, i.e. `X` and `Y` are likely from the same distribution. A value close
@@ -26,17 +26,26 @@ probably samples from different distributions.
 >>> X=rng.normal(loc=0, scale=1, size=(1000,20))
 >>> Y=rng.normal(loc=0, scale=1, size=(1000,20))
 >>> c2st(X, Y)
-0.51904464
+0.4970122828225085
 
 # now shift the mean of Y a bit
-Y=rng.normal(loc=1.5, scale=1, size=(1000,20))
+>>> Y=rng.normal(loc=0.3, scale=1, size=(1000,20))
+0.6964673015530594
+
+# and some more
+>>> Y=rng.normal(loc=1.5, scale=1, size=(1000,20))
 >>> c2st(X, Y)
-0.99950249
+0.9994791666666666
 
 # or change the distribution's width
-Y=rng.normal(loc=0, scale=2, size=(1000,20))
+>>> Y=rng.normal(loc=0, scale=2, size=(1000,20))
 >>> c2st(X, Y)
-0.95129686
+0.950321845047345
+
+# we use balanced accuracy scoring by default to handle different sample sizes
+>>> Y=rng.normal(loc=0, scale=1, size=(300,20))
+>>> c2st(X, Y)
+0.5013659591194969
 ```
 
 ## In `rsc`
