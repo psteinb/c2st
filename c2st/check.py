@@ -20,6 +20,7 @@ def c2st(
     clf=RandomForestClassifier(random_state=1),
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
+    nan_drop=False,
 ) -> np.ndarray:
     """
     Return accuracy of classifier trained to distinguish samples from
@@ -55,6 +56,8 @@ def c2st(
         cv: cross-validation class instance with sklearn API, e.g.
             sklearn.model_selection.KFold
         return_scores: Return 1d array of CV scores in addition to their mean
+        nan_drop: Filter NaNs from CV scores and at least return the mean of
+            the values left in scores.
 
     Returns:
         mean_scores: Mean of the accuracy scores over the test sets from
@@ -108,6 +111,16 @@ def c2st(
         clf, data, target, cv=cv, scoring=scoring, verbose=verbosity
     )
 
+    if nan_drop:
+        isnan = np.isnan(scores)
+        if isnan.any():
+            scores = scores[~isnan]
+        if len(scores) == 0:
+            warnings.warn(f"Only NaN scores, return NaN")
+            if return_scores:
+                return np.nan, np.array([np.nan] * len(isnan))
+            else:
+                return np.nan
     mean_scores = scores.mean()
     if return_scores:
         return mean_scores, scores
