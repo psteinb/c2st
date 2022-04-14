@@ -43,6 +43,8 @@ def c2st(
     Args:
         X: Samples from one distribution, shape (n_samples_X, n_features)
         Y: Samples from another distribution, shape (n_samples_Y, n_features)
+        scoring: a classifier scoring metric, anything that
+            sklearn.model_selection.cross_val_score(scoring=...) accepts
         z_score: Z-scoring using X
         noise_scale: If passed, will add Gaussian noise with std noise_scale to
             samples of X and of Y
