@@ -17,6 +17,8 @@ def c2st(
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
     nan_drop: bool = False,
+    dtype_data=None,
+    dtype_target=None,
 ) -> Union[float, Tuple[float, np.ndarray]]:
     """
     Return accuracy of classifier trained to distinguish samples from
@@ -50,12 +52,16 @@ def c2st(
             samples of X and of Y
         verbosity: control the verbosity of
             sklearn.model_selection.cross_val_score
-        clf: a scikit-learn classifier class instance
-        cv: cross-validation class instance with sklearn API, e.g.
+        clf: classifier class instance with sklearn-compatible API, e.g.
+            sklearn.ensemble.RandomForestClassifier
+        cv: cross-validation class instance with sklearn-compatible API, e.g.
             sklearn.model_selection.KFold
         return_scores: Return 1d array of CV scores in addition to their mean
         nan_drop: Filter NaNs from CV scores and at least return the mean of
-            the values left in scores.
+            the values left in scores
+        dtype_data: numpy dtype for data=concatenate((X,Y)), default is X's dtype
+        dtype_target: numpy dtype for target=concatenate((zeros(..),
+            ones(..))), default is numpy's float default (np.float64)
 
     Returns:
         mean_scores: Mean of the accuracy scores over the test sets from
@@ -77,10 +83,15 @@ def c2st(
         X += noise_scale * np.random.randn(*X.shape)
         Y += noise_scale * np.random.randn(*Y.shape)
 
-    # prepare data
+    assert X.dtype == Y.dtype, f"{X.dtype=} not equal to {Y.dtype=}"
+
     data = np.concatenate((X, Y))
-    # labels
+    if dtype_data is not None:
+        data = data.astype(dtype_data)
+
     target = np.concatenate((np.zeros((X.shape[0],)), np.ones((Y.shape[0],))))
+    if dtype_target is not None:
+        target = target.astype(dtype_target)
 
     scores = cross_val_score(
         clf, data, target, cv=cv, scoring=scoring, verbose=verbosity
