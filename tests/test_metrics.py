@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Optional
 
 import numpy as np
 from numpy.random import default_rng
@@ -24,13 +23,11 @@ RNG = default_rng(FIXEDSEED)
 def _get_mlp_clf(ndim, random_state=None):
     return MLPClassifier(
         activation="relu",
-        ##hidden_layer_sizes=(10 * ndim, 10 * ndim),
         hidden_layer_sizes=(ndim // 2,),
         max_iter=1000,
         solver="adam",
         random_state=random_state,
         early_stopping=True,
-        learning_rate="adaptive",
     )
 
 
@@ -41,9 +38,9 @@ def old_compare(
     n_folds: int = 5,
     scoring: str = "accuracy",
     z_score: bool = True,
-    noise_scale: Optional[float] = None,
+    noise_scale: float = None,
     verbosity: int = 0,
-) -> np.ndarray:
+):
 
     return _compare(
         X=X,
@@ -64,7 +61,7 @@ def old_c2st(
     n_folds: int = 5,
     scoring: str = "accuracy",
     z_score: bool = True,
-    noise_scale: Optional[float] = None,
+    noise_scale: float = None,
 ) -> np.ndarray:
     if z_score:
         X_mean = np.mean(X, axis=0)
@@ -73,8 +70,8 @@ def old_c2st(
         Y = (Y - X_mean) / X_std
 
     if noise_scale is not None:
-        X += noise_scale * np.random.randn(X.shape)
-        Y += noise_scale * np.random.randn(Y.shape)
+        X += noise_scale * np.random.randn(*X.shape)
+        Y += noise_scale * np.random.randn(*Y.shape)
 
     clf = _get_mlp_clf(ndim=X.shape[1], random_state=seed)
     data = np.concatenate((X, Y))
