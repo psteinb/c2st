@@ -31,7 +31,14 @@ jobs:
       # Here we do py -> ipynb
       - name: build
         run: |
-          sh rsc/notebooks/run_local.sh small_study.py 
+          cd rsc/notebooks
+          sh ./run_local.sh small_study.py 
+
+      # run the notebook
+      - name: run notebook
+        run: |
+          cd rsc/notebooks
+          poetry run jupytext small_study.ipynb --execute
 
       # Upload artifact for each CI run. Not needed for release_if_tag! This
       # uses the output of steps.build .

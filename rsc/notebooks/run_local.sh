@@ -11,9 +11,9 @@ poetry run jupytext --to notebook $1
 
 # Pair if needed
 ##jupytext --set-formats ipynb,py:percent $nb
-echo "executing ${dst}"
-# Run all cells, save outputs
-poetry run jupytext ${dst} --execute
+# echo "executing ${dst}"
+# # Run all cells, save outputs
+# poetry run jupytext ${dst} --execute
 
 # The same as `jupytext --execute` w/o jupytext
 ##jupyter nbconvert --to=notebook --inplace --ExecutePreprocessor.enabled=True $nb
