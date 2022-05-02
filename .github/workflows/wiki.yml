@@ -93,7 +93,7 @@ jobs:
           echo -e "commit: [$GITHUB_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA)" >> Home.md
 
           for fn in $(ls files/*md); do
-              echo -e "* [$fn](files/$fn)" >> Home.md
+              echo -e "* [$fn]($fn)" >> Home.md
           done
 
           git add -A
