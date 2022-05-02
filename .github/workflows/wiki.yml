@@ -27,14 +27,10 @@ jobs:
       - name: View poetry deps
         run: poetry show
 
-      # Here we do tex -> pdf
+      # Here we do py -> ipynb
       - name: build
         run: |
-          # test workflow
-          ##mkdir built_pdfs
-          ##echo foo > built_pdfs/foo.pdf
-          ##echo bar > built_pdfs/bar.pdf
-          sh rsc/notebooks/run_local.sh results.py results.ipynb
+          sh rsc/notebooks/run_local.sh small_study.py 
 
       # Upload artifact for each CI run. Not needed for release_if_tag! This
       # uses the output of steps.build .
