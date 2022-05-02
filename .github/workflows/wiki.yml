@@ -1,0 +1,103 @@
+name: Build Notebooks and Release to Wiki
+
+on: push
+
+jobs:
+  run_notebooks:
+    strategy:
+      # fail-fast: false
+      matrix:
+        python-version: ['3.10']
+        poetry-version: [1.1.11]
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.1.4
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Install required dev-dependencies
+        run: poetry install
+
+      - name: View poetry deps
+        run: poetry show
+
+      # Here we do tex -> pdf
+      - name: build
+        run: |
+          # test workflow
+          ##mkdir built_pdfs
+          ##echo foo > built_pdfs/foo.pdf
+          ##echo bar > built_pdfs/bar.pdf
+          sh rsc/notebooks/run_local.sh results.py results.ipynb
+
+      # Upload artifact for each CI run. Not needed for release_if_tag! This
+      # uses the output of steps.build .
+      - name: upload artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: built_pdfs
+          path: rsc/notebooks/
+
+      # Create a release and attach built_pdfs/*.pdf to that for easy download.
+      - name: release_if_tag
+        uses: softprops/action-gh-release@master
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "rsc/notebooks/*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # https://github.community/t/how-to-updade-repo-wiki-from-github-actions/121151
+  update_wiki:
+    needs: build_and_upload_pdfs
+    runs-on: ubuntu-latest
+
+    # The wiki is a repo itself that we can modify here. There are several
+    # actions out there that promise to help with that, e.g.
+    #
+    # * https://github.com/kai-tub/external-repo-sync-action (all)
+    # * https://github.com/ad-m/github-push-action (just do the push part)
+    #
+    # but none of them can push to the wiki since the repo is private. However,
+    # a simple `git push` here does the trick.
+    steps:
+      - name: checkout wiki
+        uses: actions/checkout@v2
+        with:
+          repository: ${{github.repository}}.wiki
+
+      - name: purge repo files
+        run: |
+          rm -rfv files built_pdfs
+
+      - name: download pdf artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: built_pdfs
+          path: built_pdfs
+
+      - name: add stuff to wiki
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          mkdir files
+          mv built_pdfs/*.pdf files/
+
+          # Create Home.md with links to all PDFs, else we can't access them
+          echo -e "PDF files (build by CI)\n" > Home.md
+          echo -e "branch: [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$GITHUB_REF_NAME)" >> Home.md
+          echo -e "commit: [$GITHUB_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA)" >> Home.md
+          for fn in $(ls files); do
+              echo -e "* [$fn](files/$fn)" >> Home.md
+          done
+
+          git add -A
+          git commit -m "gh action: update PDF files"
+          git push
