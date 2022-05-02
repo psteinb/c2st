@@ -117,7 +117,7 @@ def test_same_distributions_alt():
 
     assert obs_c2st is not None
     assert (
-        0.49 < obs_c2st < 0.51
+        0.48 < obs_c2st < 0.52
     )  # only by chance we differentiate the 2 samples
     print(obs_c2st)
 
@@ -195,7 +195,7 @@ def test_old_same_distributions_default_flexible_alt():
 
     assert obs_c2st is not None
     assert (
-        0.49 < obs_c2st < 0.51
+        0.48 < obs_c2st[0] < 0.52
     )  # only by chance we differentiate the 2 samples
 
     cv = KFold(n_splits=5, shuffle=True, random_state=seed)
@@ -209,7 +209,7 @@ def test_old_same_distributions_default_flexible_alt():
 
     assert obs2_c2st is not None
     assert (
-        0.49 < obs2_c2st < 0.51
+        0.48 < obs2_c2st < 0.52
     )  # only by chance we differentiate the 2 samples
     assert np.allclose(obs2_c2st, obs_c2st)
 
