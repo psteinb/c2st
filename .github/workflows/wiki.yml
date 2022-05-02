@@ -14,11 +14,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Run image
-        uses: abatilo/actions-poetry@v2.1.4
+
+      - uses: abatilo/actions-poetry@v2.1.4
         with:
           poetry-version: ${{ matrix.poetry-version }}
 
@@ -29,10 +30,10 @@ jobs:
         run: poetry show
 
       # Here we do py -> ipynb
-      - name: build
+      - name: build_notebook
         run: |
           cd rsc/notebooks
-          rm -fv ${small_study.py//.py/.ipynb}
+          rm -fv small_study.ipynb
           poetry run jupytext --to notebook small_study.py
 
       # run the notebook
