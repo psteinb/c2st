@@ -4,14 +4,14 @@
 # py=hyper.py
 
 dst=${1//.py/.ipynb}
-
+echo "generating ${dst} from $1"
 # Ensure clean notebook. Purge and (re-)create. Only input cells now.
 rm -fv ${dst}
 poetry run jupytext --to notebook $1
 
 # Pair if needed
 ##jupytext --set-formats ipynb,py:percent $nb
-
+echo "executing ${dst}"
 # Run all cells, save outputs
 poetry run jupytext ${dst} --execute
 
