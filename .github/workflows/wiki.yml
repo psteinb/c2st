@@ -41,6 +41,7 @@ jobs:
         run: |
           cd rsc/notebooks
           poetry run jupytext small_study.ipynb --execute
+          poetry run jupyter nbconvert --to markdown small_study.ipynb
 
       # uses the output of steps.build .
       - name: upload artifact
@@ -48,8 +49,8 @@ jobs:
         with:
           name: small-notebook
           path: |
-            rsc/notebooks/*csv
-            rsc/notebooks/*ipynb
+            rsc/notebooks/*small_study*
+            # rsc/notebooks/*
 
   # https://github.community/t/how-to-updade-repo-wiki-from-github-actions/121151
   update_wiki:
@@ -84,13 +85,14 @@ jobs:
           git config --local user.name "GitHub Action"
 
           mkdir files
-          mv downloads/*{ipynb,csv} files/
+          mv downloads/*md downloads/*files files/
 
           # Create Home.md with links to all artifacts, else we can't access them
           echo -e "artifacts (build by CI)\n" > Home.md
           echo -e "branch: [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$GITHUB_REF_NAME)" >> Home.md
           echo -e "commit: [$GITHUB_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA)" >> Home.md
-          for fn in $(ls files); do
+
+          for fn in $(ls files/*md); do
               echo -e "* [$fn](files/$fn)" >> Home.md
           done
 
