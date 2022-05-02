@@ -46,8 +46,10 @@ jobs:
       - name: upload artifact
         uses: actions/upload-artifact@master
         with:
-          name: run_notebook
-          path: rsc/notebooks/*{csv,ipynb}
+          name: small-notebook
+          path: |
+            rsc/notebooks/*csv
+            rsc/notebooks/*ipynb
 
   # https://github.community/t/how-to-updade-repo-wiki-from-github-actions/121151
   update_wiki:
@@ -73,8 +75,8 @@ jobs:
       - name: download nb artifacts
         uses: actions/download-artifact@v3
         with:
-          name: run_notebook
-          path: rsc/notebooks/*{csv,ipynb}
+          name: small-notebook
+          path: downloads/
 
       - name: add artifacts to wiki
         run: |
@@ -82,7 +84,7 @@ jobs:
           git config --local user.name "GitHub Action"
 
           mkdir files
-          mv rsc/notebooks/*{ipynb,csv} files/
+          mv downloads/*{ipynb,csv} files/
 
           # Create Home.md with links to all artifacts, else we can't access them
           echo -e "artifacts (build by CI)\n" > Home.md
