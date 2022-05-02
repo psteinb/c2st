@@ -60,14 +60,6 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
         
-    # The wiki is a repo itself that we can modify here. There are several
-    # actions out there that promise to help with that, e.g.
-    #
-    # * https://github.com/kai-tub/external-repo-sync-action (all)
-    # * https://github.com/ad-m/github-push-action (just do the push part)
-    #
-    # but none of them can push to the wiki since the repo is private. However,
-    # a simple `git push` here does the trick.
     steps:
       - name: checkout wiki
         uses: actions/checkout@v2
@@ -92,8 +84,8 @@ jobs:
           mkdir files
           mv rsc/notebooks/*{ipynb,csv} files/
 
-          # Create Home.md with links to all PDFs, else we can't access them
-          echo -e "PDF files (build by CI)\n" > Home.md
+          # Create Home.md with links to all artifacts, else we can't access them
+          echo -e "artifacts (build by CI)\n" > Home.md
           echo -e "branch: [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$GITHUB_REF_NAME)" >> Home.md
           echo -e "commit: [$GITHUB_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA)" >> Home.md
           for fn in $(ls files); do
