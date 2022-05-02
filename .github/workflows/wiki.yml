@@ -55,8 +55,13 @@ jobs:
 
   # https://github.community/t/how-to-updade-repo-wiki-from-github-actions/121151
   update_wiki:
-    needs: build_and_upload_pdfs
-    runs-on: ubuntu-latest
+    needs: run_notebooks
+    strategy:
+      # fail-fast: false
+      matrix:
+        python-version: ['3.10']
+        poetry-version: [1.1.11]
+        os: [ubuntu-latest]
 
     # The wiki is a repo itself that we can modify here. There are several
     # actions out there that promise to help with that, e.g.
@@ -72,23 +77,23 @@ jobs:
         with:
           repository: ${{github.repository}}.wiki
 
-      - name: purge repo files
+      - name: purge files from wiki repo
         run: |
-          rm -rfv files built_pdfs
+          rm -rfv files 
 
-      - name: download pdf artifacts
+      - name: download nb artifacts
         uses: actions/download-artifact@v3
         with:
           name: built_pdfs
-          path: built_pdfs
+          path: rsc/notebooks/
 
-      - name: add stuff to wiki
+      - name: add artifacts to wiki
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
           mkdir files
-          mv built_pdfs/*.pdf files/
+          mv rsc/notebooks/*.pdf files/
 
           # Create Home.md with links to all PDFs, else we can't access them
           echo -e "PDF files (build by CI)\n" > Home.md
