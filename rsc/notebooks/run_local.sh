@@ -5,7 +5,7 @@
 
 # Ensure clean notebook. Purge and (re-)create. Only input cells now.
 rm -f $2
-jupytext --to notebook $1
+poetry run jupytext --to notebook $1
 
 # Pair if needed
 ##jupytext --set-formats ipynb,py:percent $nb
