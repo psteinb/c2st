@@ -1,0 +1,101 @@
+name: Build Notebooks and Release to Wiki
+
+on: push
+
+jobs:
+  run_notebooks:
+    strategy:
+      # fail-fast: false
+      matrix:
+        python-version: ['3.10']
+        poetry-version: [1.1.11]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: abatilo/actions-poetry@v2.1.4
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+
+      - name: Install required dev-dependencies
+        run: poetry install
+
+      - name: View poetry deps
+        run: poetry show
+
+      # Here we do py -> ipynb
+      - name: build_notebook
+        run: |
+          cd rsc/notebooks
+          rm -fv small_study.ipynb
+          poetry run jupytext --to notebook small_study.py
+
+      # run the notebook
+      - name: run_notebook
+        run: |
+          cd rsc/notebooks
+          poetry run jupytext small_study.ipynb --execute
+          poetry run jupyter nbconvert --to markdown small_study.ipynb
+
+      # uses the output of steps.build .
+      - name: upload artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: small-notebook
+          path: |
+            rsc/notebooks/*small_study*
+            # rsc/notebooks/*
+
+  # https://github.community/t/how-to-updade-repo-wiki-from-github-actions/121151
+  update_wiki:
+    needs: run_notebooks
+    strategy:
+      # fail-fast: false
+      matrix:
+        python-version: ['3.10']
+        poetry-version: [1.1.11]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+        
+    steps:
+      - name: checkout wiki
+        uses: actions/checkout@v2
+        with:
+          repository: ${{github.repository}}.wiki
+
+      - name: purge files from wiki repo
+        run: |
+          rm -rfv files 
+
+      - name: download nb artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: small-notebook
+          path: downloads/
+
+      - name: add artifacts to wiki
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          mkdir files
+          mv downloads/*md downloads/*files files/
+
+          # Create Home.md with links to all artifacts, else we can't access them
+          echo -e "artifacts (build by CI)\n" > Home.md
+          echo -e "branch: [$GITHUB_REF_NAME]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/tree/$GITHUB_REF_NAME)" >> Home.md
+          echo -e "commit: [$GITHUB_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA)" >> Home.md
+
+          for fn in $(ls files/*md); do
+              echo -e "* [$fn]($fn)" >> Home.md
+          done
+
+          git add -A
+          git commit -m "gh action: update PDF files"
+          git push

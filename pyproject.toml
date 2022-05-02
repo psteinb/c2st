@@ -14,7 +14,7 @@ pytest = "^6.2"
 seaborn = "^0.11.2"
 jupyter = "^1.0.0"
 ipykernel = "^6.7.0"
-#scipy = ">=1.7.2" #required for seaborn at the time of writing
+jupytext = "^1.13.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
