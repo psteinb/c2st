@@ -10,6 +10,7 @@ jobs:
         python-version: ['3.10']
         poetry-version: [1.1.11]
         os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
@@ -58,7 +59,8 @@ jobs:
         python-version: ['3.10']
         poetry-version: [1.1.11]
         os: [ubuntu-latest]
-
+    runs-on: ${{ matrix.os }}
+        
     # The wiki is a repo itself that we can modify here. There are several
     # actions out there that promise to help with that, e.g.
     #
