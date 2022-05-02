@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Tuple
 import warnings
 
 import numpy as np
@@ -17,7 +17,7 @@ def c2st(
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
     nan_drop: bool = False,
-) -> Union[float, tuple[float, np.ndarray]]:
+) -> Union[float, Tuple[float, np.ndarray]]:
     """
     Return accuracy of classifier trained to distinguish samples from
     supposedly two distributions <X> and <Y>. For details on the method, see
