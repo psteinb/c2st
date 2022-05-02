@@ -32,30 +32,21 @@ jobs:
       - name: build
         run: |
           cd rsc/notebooks
-          sh ./run_local.sh small_study.py 
+          rm -fv ${small_study.py//.py/.ipynb}
+          poetry run jupytext --to notebook small_study.py
 
       # run the notebook
-      - name: run notebook
+      - name: run_notebook
         run: |
           cd rsc/notebooks
           poetry run jupytext small_study.ipynb --execute
 
-      # Upload artifact for each CI run. Not needed for release_if_tag! This
       # uses the output of steps.build .
       - name: upload artifact
         uses: actions/upload-artifact@master
         with:
-          name: built_pdfs
-          path: rsc/notebooks/
-
-      # Create a release and attach built_pdfs/*.pdf to that for easy download.
-      - name: release_if_tag
-        uses: softprops/action-gh-release@master
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: "rsc/notebooks/*"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: run_notebook
+          path: rsc/notebooks/*{csv,ipynb}
 
   # https://github.community/t/how-to-updade-repo-wiki-from-github-actions/121151
   update_wiki:
@@ -89,8 +80,8 @@ jobs:
       - name: download nb artifacts
         uses: actions/download-artifact@v3
         with:
-          name: built_pdfs
-          path: rsc/notebooks/
+          name: run_notebook
+          path: rsc/notebooks/*{csv,ipynb}
 
       - name: add artifacts to wiki
         run: |
@@ -98,7 +89,7 @@ jobs:
           git config --local user.name "GitHub Action"
 
           mkdir files
-          mv rsc/notebooks/*.pdf files/
+          mv rsc/notebooks/*{ipynb,csv} files/
 
           # Create Home.md with links to all PDFs, else we can't access them
           echo -e "PDF files (build by CI)\n" > Home.md
