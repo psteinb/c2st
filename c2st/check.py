@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Union
 import warnings
 
 import numpy as np
@@ -11,13 +11,13 @@ def c2st(
     Y: np.ndarray,
     scoring: str = "balanced_accuracy",
     z_score: bool = True,
-    noise_scale: Optional[float] = None,
+    noise_scale: float = None,
     verbosity: int = 0,
     clf=RandomForestClassifier(random_state=1),
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
-    nan_drop=False,
-) -> np.ndarray:
+    nan_drop: bool = False,
+) -> Union[float, tuple[float, np.ndarray]]:
     """
     Return accuracy of classifier trained to distinguish samples from
     supposedly two distributions <X> and <Y>. For details on the method, see
@@ -89,7 +89,7 @@ def c2st(
         if isnan.any():
             scores = scores[~isnan]
         if len(scores) == 0:
-            warnings.warn(f"Only NaN scores, return NaN")
+            warnings.warn("Only NaN scores, return NaN")
             if return_scores:
                 return np.nan, np.array([np.nan] * len(isnan))
             else:
