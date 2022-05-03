@@ -28,16 +28,16 @@ probably samples from different distributions.
 >>> c2st(X, Y)
 0.4970122828225085
 
-# now shift the mean of Y a bit
+# now shift the mean of Y by 0.3
 >>> Y=rng.normal(loc=0.3, scale=1, size=(1000,20))
 0.6964673015530594
 
-# and some more
+# let's move Y more extensively away from X to 1.5
 >>> Y=rng.normal(loc=1.5, scale=1, size=(1000,20))
 >>> c2st(X, Y)
 0.9994791666666666
 
-# or change the distribution's width
+# or change the distribution's variance, so we compare a narrow to a wide distribution at the same loc
 >>> Y=rng.normal(loc=0, scale=2, size=(1000,20))
 >>> c2st(X, Y)
 0.950321845047345
