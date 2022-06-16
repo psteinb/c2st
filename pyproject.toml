@@ -8,6 +8,9 @@ authors = ["Peter Steinbach <p.steinbach@hzdr.de>"]
 python = ">=3.8,<3.11"
 scikit-learn = "^1.0.2"
 numpy = "^1.22.1"
+# skorch has friendly deps (only numpy, sklearn, scipy, ...) but doesn't pull
+# some random version of torch.
+skorch = "^0.11.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
