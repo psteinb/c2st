@@ -19,6 +19,7 @@ def c2st(
     nan_drop: bool = False,
     dtype_data=None,
     dtype_target=None,
+    cross_val_score_kwds: dict = dict(),
 ) -> Union[float, Tuple[float, np.ndarray]]:
     """
     Return accuracy of classifier trained to distinguish samples from
@@ -62,6 +63,8 @@ def c2st(
         dtype_data: numpy dtype for data=concatenate((X,Y)), default is X's dtype
         dtype_target: numpy dtype for target=concatenate((zeros(..),
             ones(..))), default is numpy's float default (np.float64)
+        cross_val_score_kwds: Additional kwds passed to sklearn's
+            cross_val_score()
 
     Returns:
         mean_scores: Mean of the accuracy scores over the test sets from
@@ -94,7 +97,13 @@ def c2st(
         target = target.astype(dtype_target)
 
     scores = cross_val_score(
-        clf, data, target, cv=cv, scoring=scoring, verbose=verbosity
+        clf,
+        data,
+        target,
+        cv=cv,
+        scoring=scoring,
+        verbose=verbosity,
+        **cross_val_score_kwds,
     )
 
     if nan_drop:
