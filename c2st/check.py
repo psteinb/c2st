@@ -85,7 +85,7 @@ def c2st(
 
     assert X.dtype == Y.dtype, f"{X.dtype=} not equal to {Y.dtype=}"
 
-    data = np.concatenate((X, Y))
+    data = np.concatenate((X, Y), axis=0)
     if dtype_data is not None:
         data = data.astype(dtype_data)
 
