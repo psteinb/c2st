@@ -12,7 +12,7 @@ def c2st(
     scoring: str = "balanced_accuracy",
     z_score: bool = True,
     noise_scale: float = None,
-    verbosity: int = 0,
+    verbose: int = 0,
     clf=RandomForestClassifier(random_state=1),
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
@@ -51,7 +51,7 @@ def c2st(
         z_score: Z-scoring using X
         noise_scale: If passed, will add Gaussian noise with std noise_scale to
             samples of X and of Y
-        verbosity: control the verbosity of
+        verbose: control the verbosity of
             sklearn.model_selection.cross_val_score
         clf: classifier class instance with sklearn-compatible API, e.g.
             sklearn.ensemble.RandomForestClassifier
@@ -102,7 +102,7 @@ def c2st(
         target,
         cv=cv,
         scoring=scoring,
-        verbose=verbosity,
+        verbose=verbose,
         **cross_val_score_kwds,
     )
 
