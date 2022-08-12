@@ -29,9 +29,12 @@ def test_skorch_clf(build_clf_name):
         batch_size=10,
         verbose=True,
     )
-    X = np.random.rand(100, ndim).astype(clf.module.dtype_data)
-    y = np.concatenate((np.ones(50), np.zeros(50))).astype(
-        clf.module.dtype_target
-    )
+    X = np.random.rand(100, ndim)
+    y = np.concatenate((np.ones(50), np.zeros(50)))
+
+    # Test API w/ auto type cast for np.ndarray input
     clf.fit(X, y)
     clf.predict(X)
+    clf.predict_proba(X)
+    clf.score(X, y)
+    clf.partial_fit(X, y)

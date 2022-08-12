@@ -169,7 +169,7 @@ class _SkorchClassifierModule(T.nn.Module):
         """
         super().__init__()
 
-        assert ndim_in is not None
+        assert ndim_in is not None, "ndim_in is None"
         self.ndim_in = ndim_in
         assert self.is_binary is not None
 
@@ -206,7 +206,9 @@ class _SkorchClassifierModule(T.nn.Module):
         self.model = T.nn.Sequential(OrderedDict(layers))
 
     def forward(self, X):
-        assert self.ndim_in == X.shape[1]
+        assert (
+            self.ndim_in == X.shape[1]
+        ), f"{self.ndim_in=} doesn't match {X.shape[1]=}"
         return self.model(X)
 
 
@@ -224,6 +226,45 @@ class SkorchBinaryClassifierModule(_SkorchClassifierModule):
     dtype_data = np.float32
     dtype_target = np.float32
     is_binary = True
+
+
+def astype(x, dtype):
+    if isinstance(x, np.ndarray):
+        return x if x.dtype == dtype else x.astype(dtype)
+    else:
+        return x
+
+
+class DtypeHandlerMixin:
+    def predict(self, X, **kwds):
+        return super().predict(
+            astype(X, self.module.dtype_data),
+            **kwds,
+        )
+
+    def predict_proba(self, X, **kwds):
+        return super().predict_proba(
+            astype(X, self.module.dtype_data),
+            **kwds,
+        )
+
+    # fit_loop -> partial_fit -> fit
+    def fit_loop(self, X, y, **kwds):
+        return super().fit_loop(
+            astype(X, self.module.dtype_data),
+            astype(y, self.module.dtype_target),
+            **kwds,
+        )
+
+
+class DtypeHandlerNeuralNetClassifier(DtypeHandlerMixin, NeuralNetClassifier):
+    pass
+
+
+class DtypeHandlerNeuralNetBinaryClassifier(
+    DtypeHandlerMixin, NeuralNetBinaryClassifier
+):
+    pass
 
 
 default_kwds = dict(
@@ -254,12 +295,14 @@ default_kwds["optimizer__weight_decay"] = 0
 def skorch_classifier(*args, **kwds):
     _kwds = default_kwds.copy()
     _kwds.update(kwds)
-    return NeuralNetClassifier(SkorchClassifierModule, *args, **_kwds)
+    return DtypeHandlerNeuralNetClassifier(
+        SkorchClassifierModule, *args, **_kwds
+    )
 
 
 def skorch_binary_classifier(*args, **kwds):
     _kwds = default_kwds.copy()
     _kwds.update(kwds)
-    return NeuralNetBinaryClassifier(
+    return DtypeHandlerNeuralNetBinaryClassifier(
         SkorchBinaryClassifierModule, *args, **_kwds
     )
