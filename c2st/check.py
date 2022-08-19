@@ -5,6 +5,8 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold, cross_val_score
 
+from scipy.stats import norm
+
 
 def c2st(
     X: np.ndarray,
@@ -121,3 +123,55 @@ def c2st(
         return mean_scores, scores
     else:
         return mean_scores
+
+
+def alpha2score(alpha: float, test_size: Union[int, float]):
+    """Convert significance level alpha (e.g. alpha=0.05) to maximal c2st score
+    t = 0.5 + epsilon below which we accept the null hypothesis P=Q where X~P
+    and Y~Q.
+
+    This is z_alpha from [1], appendix B, using the null distribution of the
+    test statistic t ~ N(1/2, 1/(4*test_size)), where t = c2st score [0.5...1].
+
+    Args:
+        alpha: significance level
+        test_size: size of test set, for the default cv=KFold(5) we do here
+            this would be (X.shape[0] + Y.shape[0])/5
+
+    [1] Lopez-Paz et al., ICLR 2017, https://arxiv.org/abs/1610.06545
+    """
+    return 0.5 + norm.ppf(1 - alpha) / np.sqrt(4 * test_size)
+
+
+def score2pvalue(score, test_size):
+    """Inverse of alpha2score().
+
+    Convert c2st score (test statistic t) to p-value. If this is bigger than a
+    chosen significance level (e.g. alpha=0.05) then we accept the null
+    hypothesis P=Q, else we reject it.
+
+    The p-value is the probablilty, given P=Q where t=0.5, that we observe
+    score t=0.5+epsilon or bigger. This probablilty gets smaller with
+    increasing t since it is more unlikely to get scores far away from 0.5 when
+    P=Q is true.
+
+    Example:
+
+    >>> from c2st import check
+    >>> alpha=0.05
+    # Assume X.shape[0] + Y.shape[0] = 1e4
+    >>> test_size=1e4/5
+    >>> for alpha in [0.05, 0.01]:
+    ...     for score in [0.51, 0.52, 0.53]:
+    ...         p = check.score2pvalue(score, test_size)
+    ...         print(f"{score=}, {p=:.4f}",
+                    f"accept (p>{alpha}): P = Q" if p>=alpha else
+                    f"reject (p<{alpha}): P != Q")
+    score=0.51, p=0.1855 accept (p>0.05): P = Q
+    score=0.52, p=0.0368 reject (p<0.05): P != Q
+    score=0.53, p=0.0036 reject (p<0.05): P != Q
+    score=0.51, p=0.1855 accept (p>0.01): P = Q
+    score=0.52, p=0.0368 accept (p>0.01): P = Q
+    score=0.53, p=0.0036 reject (p<0.01): P != Q
+    """
+    return 1 - norm.cdf(score, loc=0.5, scale=0.5 * np.sqrt(1 / test_size))

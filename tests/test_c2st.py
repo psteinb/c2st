@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import StratifiedKFold, KFold
 
-from c2st.check import c2st
+from c2st.check import c2st, alpha2score, score2pvalue
 
 
 rng = np.random.default_rng(seed=123)
@@ -23,3 +23,10 @@ def test_api():
 
     ms, s = c2st(X, Y, return_scores=True, cv=KFold(7))
     assert len(s) == 7
+
+
+def test_alpha():
+    score = 0.5 + 0.1 * rng.random()
+    test_size = 1e3
+    score_roundtrip = alpha2score(score2pvalue(score, test_size), test_size)
+    np.testing.assert_allclose(score, score_roundtrip, rtol=0, atol=1e-12)
