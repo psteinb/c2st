@@ -1,9 +1,9 @@
 from typing import Sequence
 
-from sklearn.model_selection import train_test_split
-
 from xgboost import XGBClassifier
 from xgboost.callback import EarlyStopping
+
+from c2st.utils import train_test_split_idx
 
 
 def has_es_callback(callbacks: Sequence):
@@ -41,15 +41,19 @@ class C2STXGBClassifier(XGBClassifier):
                     "eval_set, but eval_set was specified "
                 )
 
-            X_train, X_test, y_train, y_test = train_test_split(
+            idxs_train, idxs_test = train_test_split_idx(
                 X,
                 y,
                 test_size=self.validation_fraction,
                 shuffle=True,
                 random_state=self.random_state,
             )
-            eval_set = [(X_test, y_test)]
+            return super().fit(
+                X[idxs_train, :],
+                y[idxs_train],
+                *args,
+                eval_set=[(X[idxs_test, :], y[idxs_test])],
+                **kwds,
+            )
         else:
-            eval_set = None
-            X_train, y_train = X, y
-        return super().fit(X_train, y_train, *args, eval_set=eval_set, **kwds)
+            return super().fit(X, y, *args, **kwds)
