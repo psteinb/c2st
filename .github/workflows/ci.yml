@@ -27,8 +27,7 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
 
       - name: Install required dependencies
-        run: poetry install --no-dev --extras test
-
+        run: poetry install --no-dev --extras "test xgboost"
 
       - name: View poetry deps
         run: poetry show
