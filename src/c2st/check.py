@@ -3,7 +3,7 @@ import warnings
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import KFold, cross_val_score
+from sklearn.model_selection import KFold, cross_validate
 
 from scipy.stats import norm
 
@@ -18,10 +18,11 @@ def c2st(
     clf=RandomForestClassifier(random_state=1),
     cv=KFold(n_splits=5, shuffle=True, random_state=1),
     return_scores: bool = False,
+    return_clfs: bool = False,
     nan_drop: bool = False,
     dtype_data=None,
     dtype_target=None,
-    cross_val_score_kwds: dict = dict(),
+    cross_val_kwds: dict = dict(),
 ) -> Union[float, Tuple[float, np.ndarray]]:
     """
     Run the c2st method on samples in X and Y.
@@ -48,25 +49,29 @@ def c2st(
 
         noise_scale: If passed, will add Gaussian noise with std noise_scale to
             samples of X and of Y
-        verbose: control the verbosity of
-            sklearn.model_selection.cross_val_score
+        verbose: control the verbosity of sklearn.model_selection.cross_validate
         clf: classifier class instance with sklearn-compatible API, e.g.
             sklearn.ensemble.RandomForestClassifier
         cv: cross-validation class instance with sklearn-compatible API, e.g.
             sklearn.model_selection.KFold
         return_scores: Return 1d array of CV scores in addition to their mean
+        return_clfs: Return sequence of trained classifiers for each fold.
+            This is equal to
+            ``cross_validate(..., return_estimator=True)["estimator"]``
         nan_drop: Filter NaNs from CV scores and at least return the mean of
             the values left in scores
         dtype_data: numpy dtype for data=concatenate((X,Y)), default is X's dtype
         dtype_target: numpy dtype for target=concatenate((zeros(..),
             ones(..))), default is numpy's float default (np.float64)
-        cross_val_score_kwds: Additional kwds passed to sklearn's
-            cross_val_score()
+        cross_val_kwds: Additional kwds passed to sklearn's
+            cross_validate()
 
     Returns:
         mean_scores: Mean of the accuracy scores over the test sets from
             cross-validation.
         scores: 1d array of CV scores. Only if return_scores is True.
+        clfs: Sequence of trained `clf` instances for each CV fold.
+            Only if return_clfs is True.
     """
     if z_score:
         X_mean = np.mean(X, axis=0)
@@ -88,15 +93,19 @@ def c2st(
     if dtype_target is not None:
         target = target.astype(dtype_target)
 
-    scores = cross_val_score(
+    if return_clfs and (not cross_val_kwds.get("return_estimator", False)):
+        cross_val_kwds["return_estimator"] = True
+
+    cv_data = cross_validate(
         clf,
         data,
         target,
         cv=cv,
         scoring=scoring,
         verbose=verbose,
-        **cross_val_score_kwds,
+        **cross_val_kwds,
     )
+    scores = cv_data["test_score"]
 
     if nan_drop:
         isnan = np.isnan(scores)
@@ -104,15 +113,15 @@ def c2st(
             scores = scores[~isnan]
         if len(scores) == 0:
             warnings.warn("Only NaN scores, return NaN")
-            if return_scores:
-                return np.nan, np.array([np.nan] * len(isnan))
-            else:
-                return np.nan
+            scores = np.array([np.nan] * len(isnan))
+
     mean_scores = scores.mean()
+    out = [mean_scores]
     if return_scores:
-        return mean_scores, scores
-    else:
-        return mean_scores
+        out.append(scores)
+    if return_clfs:
+        out.append(cv_data["estimator"])
+    return out[0] if len(out) == 1 else tuple(out)
 
 
 def alpha2score(alpha: float, test_size: Union[int, float]):
