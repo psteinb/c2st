@@ -13,7 +13,7 @@ have_skorch = importlib.util.find_spec("skorch") is not None
 @pytest.mark.skipif(not have_torch, reason="torch not found")
 @pytest.mark.skipif(not have_skorch, reason="skorch not found")
 @pytest.mark.parametrize(
-    "build_clf_name", ["skorch_classifier", "skorch_binary_classifier"]
+    "build_clf_name", ["get_clf", "get_binary_clf"]
 )
 def test_skorch_clf(build_clf_name):
     c2st_classifiers_skorch = importlib.import_module(

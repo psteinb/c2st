@@ -306,3 +306,10 @@ def skorch_binary_classifier(*args, **kwds):
     return DtypeHandlerNeuralNetBinaryClassifier(
         SkorchBinaryClassifierModule, *args, **_kwds
     )
+
+# Get a general classifier with early stopping enabled. Same as classifiers.xgboost.get_clf()
+get_clf = skorch_classifier
+
+# Special case for Skorch: Binary-only version of NeuralNetClassifier =
+# NeuralNetBinaryClassifier. Also with early stopping enabled.
+get_binary_clf = skorch_binary_classifier
