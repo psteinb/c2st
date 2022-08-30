@@ -1,6 +1,6 @@
 """
 Notes on how to use XGBClassifier with EarlyStopping and how to use our
-C2STXGBClassifier wrapper.
+EarlyStoppingXGBClassifier wrapper.
 
 loss: XGBClassifier(objective=...)
 ==================================
@@ -95,7 +95,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
 from c2st.check import c2st
-from c2st.classifiers.xgboost import C2STXGBClassifier
+from c2st.classifiers.xgboost import EarlyStoppingXGBClassifier
 
 
 def get_es_callback():
@@ -196,10 +196,10 @@ if __name__ == "__main__":
     plt.show()
 
     # ------------------------------------------------------------------------
-    # Use C2STXGBClassifier w/ EarlyStopping in c2st
+    # Use EarlyStoppingXGBClassifier w/ EarlyStopping in c2st
     # ------------------------------------------------------------------------
 
-    clf = C2STXGBClassifier(
+    clf = EarlyStoppingXGBClassifier(
         n_estimators=500,
         eval_metric=["error", "logloss"],
         tree_method="hist",
