@@ -68,3 +68,29 @@ class EarlyStoppingXGBClassifier(XGBClassifier):
             )
         else:
             return super().fit(X, y, *args, **kwds)
+
+def get_es_callback():
+    return EarlyStopping(
+        rounds=5,
+        metric_name="error",
+        maximize=False,
+        save_best=True,
+        min_delta=1e-3,
+    )
+
+
+default_kwds = dict(
+    n_estimators=500,
+    eval_metric=["error", "logloss"],
+    tree_method="hist",
+    random_state=123,
+    validation_fraction=0.1,
+    validation_split_shuffle=True,
+)
+
+
+def get_clf(*args, **kwds):
+    _kwds = default_kwds.copy()
+    _kwds["callbacks"] = [get_es_callback()]
+    _kwds.update(kwds)
+    return EarlyStoppingXGBClassifier(*args, **_kwds)
