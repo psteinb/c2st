@@ -14,8 +14,18 @@ def has_es_callback(callbacks: Sequence):
     return False
 
 
-class C2STXGBClassifier(XGBClassifier):
-    def __init__(self, *, validation_fraction: float = 0.1, **kwds):
+class EarlyStoppingXGBClassifier(XGBClassifier):
+    """XGBClassifier wrapper with automatic eval_set creation in ``fit()``
+    based on `validation_fraction`.
+    """
+
+    def __init__(
+        self,
+        *,
+        validation_fraction: float = 0.1,
+        validation_split_shuffle=True,
+        **kwds,
+    ):
         assert not hasattr(
             self, "validation_fraction"
         ), "validation_fraction attribute already present"
@@ -30,6 +40,7 @@ class C2STXGBClassifier(XGBClassifier):
                     "early_stopping_rounds or EarlyStopping callback given"
                 )
         self.validation_fraction = validation_fraction
+        self.validation_split_shuffle = validation_split_shuffle
 
         return super().__init__(**kwds)
 
@@ -45,7 +56,7 @@ class C2STXGBClassifier(XGBClassifier):
                 X,
                 y,
                 test_size=self.validation_fraction,
-                shuffle=True,
+                shuffle=self.validation_split_shuffle,
                 random_state=self.random_state,
             )
             return super().fit(

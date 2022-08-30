@@ -11,7 +11,7 @@ def test_xgboost_clf():
     from xgboost.callback import EarlyStopping
 
     from c2st.check import c2st
-    from c2st.classifiers.xgboost import C2STXGBClassifier
+    from c2st.classifiers.xgboost import EarlyStoppingXGBClassifier
 
     def get_es_callback():
         return EarlyStopping(
@@ -23,12 +23,13 @@ def test_xgboost_clf():
         )
 
     def get_clf():
-        return C2STXGBClassifier(
+        return EarlyStoppingXGBClassifier(
             n_estimators=500,
             eval_metric=["error", "logloss"],
             tree_method="hist",
             callbacks=[get_es_callback()],
             validation_fraction=0.1,
+            validation_split_shuffle=True,
             random_state=seed,
         )
 
