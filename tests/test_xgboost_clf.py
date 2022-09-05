@@ -13,10 +13,7 @@ have_xgboost = importlib.util.find_spec("xgboost") is not None
 def test_xgboost_clf(api_type):
 
     if api_type == "class":
-        from c2st.classifiers.xgboost import (
-            EarlyStoppingXGBClassifier,
-        )
-
+        from c2st.classifiers.xgboost import EarlyStoppingXGBClassifier
         from xgboost.callback import EarlyStopping
 
         def get_es_callback():
