@@ -24,33 +24,28 @@ def c2st(
     cross_val_score_kwds: dict = dict(),
 ) -> Union[float, Tuple[float, np.ndarray]]:
     """
-    Return accuracy of classifier trained to distinguish samples from
-    supposedly two distributions <X> and <Y>. For details on the method, see
-    [1,2]. If the returned accuracy is 0.5, <X> and <Y> are considered to be
-    from the same generating PDF, i.e. they can not be differentiated. If the
-    returned accuracy is around 1., <X> and <Y> are considered to be from two
-    different generating PDFs.
+    Run the c2st method on samples in X and Y.
 
-    Trains classifiers with N-fold cross-validation [3]. By default, a
-    `RandomForestClassifier` from scikit-learn is used. This can be changed by
-    passing another classifier instance, e.g.
+    Train k classifiers of type `clf` with k-fold cross-validation and return
+    the mean of k scores as the c2st test statistic.
 
-    ::
-
-        c2st(..., clf=KNeighborsClassifier(5))
-
-    Also other CV methods can be specified that way.
-
-    ::
-
-        c2st(..., cv=StratifiedKFold(5))
+    By default, a `RandomForestClassifier` from scikit-learn is used. This can
+    be changed by passing another classifier instance, e.g. `c2st(...,
+    clf=KNeighborsClassifier(5))` Also other cross-validation methods can be
+    specified that way: `c2st(..., cv=StratifiedKFold(5))`.
 
     Args:
         X: Samples from one distribution, shape (n_samples_X, n_features)
         Y: Samples from another distribution, shape (n_samples_Y, n_features)
         scoring: a classifier scoring metric, anything that
             sklearn.model_selection.cross_val_score(scoring=...) accepts
-        z_score: Z-scoring using X
+        z_score: Z-scoring using X: apply X's scaling also to Y, same as
+
+            >>> from sklearn.preprocessing import StandardScaler
+            >>> x_scaler=StandardScaler().fit(X)
+            >>> X_scaled=x_scaler.transform(X)
+            >>> Y_scaled=x_scaler.transform(Y)
+
         noise_scale: If passed, will add Gaussian noise with std noise_scale to
             samples of X and of Y
         verbose: control the verbosity of
@@ -72,11 +67,6 @@ def c2st(
         mean_scores: Mean of the accuracy scores over the test sets from
             cross-validation.
         scores: 1d array of CV scores. Only if return_scores is True.
-
-    References:
-        [1]: http://arxiv.org/abs/1610.06545
-        [2]: https://www.osti.gov/biblio/826696/
-        [3]: https://scikit-learn.org/stable/modules/cross_validation.html
     """
     if z_score:
         X_mean = np.mean(X, axis=0)
@@ -138,12 +128,16 @@ def alpha2score(alpha: float, test_size: Union[int, float]):
         test_size: size of test set, for the default cv=KFold(5) we do here
             this would be (X.shape[0] + Y.shape[0])/5
 
-    [1] Lopez-Paz et al., ICLR 2017, https://arxiv.org/abs/1610.06545
+    Returns:
+        max_score: Score below which we accept the null hypothesis P=Q.
+
+    References:
+        [1] Lopez-Paz et al., ICLR 2017, https://arxiv.org/abs/1610.06545
     """
     return 0.5 + norm.ppf(1 - alpha) / np.sqrt(4 * test_size)
 
 
-def score2pvalue(score, test_size):
+def score2pvalue(score: float, test_size: Union[int, float]):
     """Inverse of alpha2score().
 
     Convert c2st score (test statistic t) to p-value. If this is bigger than a
