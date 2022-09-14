@@ -1,9 +1,10 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Sequence
 import warnings
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold, cross_validate
+from sklearn.base import ClassifierMixin
 
 from scipy.stats import norm
 
@@ -23,7 +24,12 @@ def c2st(
     dtype_data=None,
     dtype_target=None,
     cross_val_kwds: dict = dict(),
-) -> Union[float, Tuple[float, np.ndarray]]:
+) -> Union[
+    float,
+    Tuple[float, np.ndarray],
+    Tuple[float, Sequence[ClassifierMixin]],
+    Tuple[float, np.ndarray, Sequence[ClassifierMixin]],
+]:
     """
     Run the c2st method on samples in X and Y.
 
