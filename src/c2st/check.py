@@ -122,12 +122,12 @@ def c2st(
             scores = np.array([np.nan] * len(isnan))
 
     mean_scores = scores.mean()
-    out = [mean_scores]
+    out = (mean_scores,)
     if return_scores:
-        out.append(scores)
+        out += (scores,)
     if return_clfs:
-        out.append(cv_data["estimator"])
-    return out[0] if len(out) == 1 else tuple(out)
+        out += (cv_data["estimator"],)
+    return out[0] if len(out) == 1 else out
 
 
 def alpha2score(alpha: float, test_size: Union[int, float]):
