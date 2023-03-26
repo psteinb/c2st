@@ -11,7 +11,7 @@ authors = [
 
 [tool.poetry.dependencies]
 
-python = ">=3.8,<3.11"
+python = ">=3.8"
 
 # Those are also picked up by "pip install". Thank you very much.
 scikit-learn = ">=1.1.2"
