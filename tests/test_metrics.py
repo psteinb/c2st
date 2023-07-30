@@ -28,6 +28,7 @@ def _get_mlp_clf(ndim, random_state=None):
         solver="adam",
         random_state=random_state,
         early_stopping=True,
+        n_iter_no_change=50,
     )
 
 
