@@ -1,21 +1,57 @@
 [tool.poetry]
+
 name = "c2st"
 version = "0.1.0"
 description = ""
-authors = ["Peter Steinbach <p.steinbach@hzdr.de>"]
+authors = [
+    "Peter Steinbach <p.steinbach@hzdr.de>",
+    "Steve Schmerler <git@elcorto.com>",
+    ]
+
 
 [tool.poetry.dependencies]
+
 python = ">=3.8,<3.11"
-scikit-learn = "^1.0.2"
-numpy = "^1.22.1"
+
+# Those are also picked up by "pip install". Thank you very much.
+scikit-learn = ">=1.1.2"
+numpy = ">=1.21"
+scipy = ">=1.7"
+
+# See [tool.poetry.extras] section.
+pytest = {version="*", optional=true}
+skorch = {version=">=0.11", optional=true}
+xgboost = {version=">=1.6.1", optional=true}
+
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2"
+
+# Those are ignored by pip but installed by default by poetry. Use "poetry
+# install --no-dev" to avoid that.
 seaborn = "^0.11.2"
 jupyter = "^1.0.0"
 ipykernel = "^6.7.0"
-#scipy = ">=1.7.2" #required for seaborn at the time of writing
+
+
+[tool.poetry.extras]
+
+# poetry install --no-dev --extras test
+test = ["pytest"]
+
+# Extra deps for c2st/classifiers/. poetry's "extras" syntax does not follow
+# PEP 621 as it seems. As such, there's no way to install them with pip by
+# parsing this file. If you use pip, please install manually if needed. Also we
+# need to specify them again in the [tool.poetry.dependencies] section.
+#
+# skorch has friendly deps (only numpy, sklearn, scipy, ...) but doesn't pull
+# some random version of torch. Please install torch manually when using
+# skorch, e.g. something like
+#   pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+skorch = ["skorch"]
+xgboost = ["xgboost"]
+
 
 [build-system]
+
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

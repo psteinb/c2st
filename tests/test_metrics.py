@@ -39,7 +39,7 @@ def old_compare(
     scoring: str = "accuracy",
     z_score: bool = True,
     noise_scale: float = None,
-    verbosity: int = 0,
+    verbose: int = 0,
 ):
 
     return _compare(
@@ -48,7 +48,7 @@ def old_compare(
         scoring=scoring,
         z_score=z_score,
         noise_scale=noise_scale,
-        verbosity=verbosity,
+        verbose=verbose,
         cv=KFold(n_splits=n_folds, random_state=seed, shuffle=True),
         clf=_get_mlp_clf(X.shape[1], random_state=seed),
     )
