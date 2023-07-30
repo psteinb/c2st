@@ -1,5 +1,6 @@
 from typing import Union, Tuple, Sequence
 import warnings
+import copy
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -24,6 +25,7 @@ def c2st(
     dtype_data=None,
     dtype_target=None,
     cross_val_kwds: dict = dict(),
+    cross_val_score_kwds: dict = None,
 ) -> Union[
     float,
     Tuple[float, np.ndarray],
@@ -79,6 +81,27 @@ def c2st(
         clfs: Sequence of trained `clf` instances for each CV fold.
             Only if return_clfs is True.
     """
+    if cross_val_score_kwds is not None:
+        assert len(cross_val_kwds) == 0, (
+            f"Cannot use cross_val_kwds and cross_val_score_kwds. "
+            f"Got {cross_val_score_kwds=} {cross_val_kwds=}. "
+            f"Use only cross_val_kwds."
+        )
+
+        # cross_validate() and cross_val_score() have basically the same input
+        # signature, so this should be safe.
+        warnings.warn(
+            "cross_val_score_kwds is deprecated, use "
+            "cross_val_kwds. Will pass cross_val_score_kwds to "
+            "cross_validate().",
+            DeprecationWarning,
+        )
+
+        # Copy to avoid altering passed in dict in return_clfs=True case.
+        _cross_val_kwds = copy.deepcopy(cross_val_score_kwds)
+    else:
+        _cross_val_kwds = copy.deepcopy(cross_val_kwds)
+
     if z_score:
         X_mean = np.mean(X, axis=0)
         X_std = np.std(X, axis=0)
@@ -99,8 +122,8 @@ def c2st(
     if dtype_target is not None:
         target = target.astype(dtype_target)
 
-    if return_clfs and (not cross_val_kwds.get("return_estimator", False)):
-        cross_val_kwds["return_estimator"] = True
+    if return_clfs and (not _cross_val_kwds.get("return_estimator", False)):
+        _cross_val_kwds["return_estimator"] = True
 
     cv_data = cross_validate(
         clf,
@@ -109,7 +132,7 @@ def c2st(
         cv=cv,
         scoring=scoring,
         verbose=verbose,
-        **cross_val_kwds,
+        **_cross_val_kwds,
     )
     scores = cv_data["test_score"]
 

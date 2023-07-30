@@ -6,6 +6,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, KFold
 
+import pytest
+
 from c2st.check import c2st, alpha2score, score2pvalue
 
 
@@ -46,6 +48,28 @@ def test_api():
     assert isinstance(clfs, Sequence)
     assert len(clfs) == 7
     assert isinstance(clfs[0], KNeighborsClassifier)
+
+
+def test_api_deprecated_pass():
+    X = randn(10, 3)
+    Y = randn(5, 3)
+
+    ##with pytest.warns(DeprecationWarning):
+    with pytest.deprecated_call():
+        c2st(X, Y, cross_val_score_kwds=dict())
+
+
+@pytest.mark.xfail
+def test_api_deprecated_fail():
+    X = randn(10, 3)
+    Y = randn(5, 3)
+
+    c2st(
+        X,
+        Y,
+        cross_val_kwds=dict(verbose=2),
+        cross_val_score_kwds=dict(verbose=2),
+    )
 
 
 def test_alpha():
