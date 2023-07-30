@@ -122,7 +122,20 @@ def c2st(
     if dtype_target is not None:
         target = target.astype(dtype_target)
 
-    if return_clfs and (not _cross_val_kwds.get("return_estimator", False)):
+    if return_clfs:
+        if "return_estimator" in _cross_val_kwds:
+            if _cross_val_kwds["return_estimator"]:
+                warnings.warn(
+                    f"return_clfs=True but also "
+                    f"{cross_val_kwds['return_estimator']=} given, "
+                    f"use only return_clfs"
+                )
+            else:
+                raise ValueError(
+                    f"return_clfs=True but "
+                    f"{cross_val_kwds['return_estimator']=}, not sure what "
+                    f"you want"
+                )
         _cross_val_kwds["return_estimator"] = True
 
     cv_data = cross_validate(
