@@ -51,6 +51,11 @@ skorch = ["skorch"]
 xgboost = ["xgboost"]
 
 
+[tool.mypy]
+ignore_missing_imports = true
+implicit_optional = true
+
+
 [build-system]
 
 requires = ["poetry-core>=1.0.0"]
