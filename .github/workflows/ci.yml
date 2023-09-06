@@ -32,7 +32,7 @@ jobs:
 
       - name: Install required dependencies
         run: |
-          poetry run pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+          poetry run pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
           poetry install --no-dev --extras "test xgboost skorch"
 
       - name: View poetry deps
