@@ -24,6 +24,7 @@ skorch = {version=">=0.11", optional=true}
 xgboost = {version=">=1.6.1", optional=true}
 
 
+
 [tool.poetry.dev-dependencies]
 
 # Those are ignored by pip but installed by default by poetry. Use "poetry
