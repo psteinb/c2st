@@ -61,14 +61,14 @@ def print_csv(
     
 
 class GaussianData(collections.abc.Sequence):
-    def __init__(self, NDIM, means, std_devs, max_nsamples):
+    def __init__(self, NDIM, means, std_devs, max_nsamples, seed=420):
         self.NDIM = NDIM
         self.means = means
         self.std_devs = std_devs
         self.max_nsamples = max_nsamples
         self.data = [dict() for _ in range(len(NDIM))]
         self.center_samples = dict()
-        RNG = default_rng(420)
+        RNG = default_rng(seed)
         for i, dim in enumerate(NDIM):
             self.center_samples[dim] = RNG.multivariate_normal(
                 mean=np.zeros(dim), 
